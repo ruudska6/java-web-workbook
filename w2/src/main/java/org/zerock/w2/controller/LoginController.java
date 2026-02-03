@@ -1,8 +1,10 @@
 package org.zerock.w2.controller;
 
 import java.io.IOException;
+import java.util.UUID;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,8 +33,30 @@ public class LoginController extends HttpServlet {
         String mid = req.getParameter("mid");
         String mpw = req.getParameter("mpw");
 
+        String auto = req.getParameter("auto");
+
+        boolean rememberMe = auto != null && auto.equals("on");
+
+        if (rememberMe) {
+            String uuid = UUID.randomUUID().toString();
+        }
+
         try {
             MemberDTO memberDTO = MemberService.INSTANCE.login(mid, mpw);
+
+            if(rememberMe){
+                String uuid = UUID.randomUUID().toString();
+
+                MemberService.INSTANCE.updateUuid(mid, uuid);
+                memberDTO.setUuid(uuid);
+
+                Cookie rememberCookie = new Cookie("remember-me", uuid);
+                rememberCookie.setPath("/");
+                rememberCookie.setMaxAge(60 * 60 * 24 * 7);
+
+                resp.addCookie(rememberCookie);
+            }
+
             HttpSession session = req.getSession();
             session.setAttribute("loginInfo", memberDTO);
             resp.sendRedirect("/todo/list");

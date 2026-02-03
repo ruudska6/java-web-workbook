@@ -13,6 +13,7 @@
 </head>
 <body>
 
+<h2>${appName}</h2>
 <h2>${loginInfo}</h2>
 <h3>${loginInfo.mname}</h3>
 
